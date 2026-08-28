@@ -1,0 +1,24 @@
+name: Fix admin dashboard export
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, 'Fix admin dashboard export') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add default export
+        run: |
+          if ! grep -q "export default AdminDashboard" src/admin-dashboard.jsx; then
+            printf '\nexport default AdminDashboard;\n' >> src/admin-dashboard.jsx
+          fi
+      - name: Commit fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/admin-dashboard.jsx
+          git diff --cached --quiet || git commit -m 'Fix admin dashboard export'
+          git push
