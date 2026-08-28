@@ -1,0 +1,31 @@
+name: Extract uploaded Farm Market project
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    if: ${{ !contains(github.event.head_commit.message, 'Extract uploaded project') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Extract project
+        run: |
+          rm -rf /tmp/farm-market
+          mkdir -p /tmp/farm-market
+          unzip -o Farm-market-uganda-end-to-end-admin.zip -d /tmp/farm-market
+          cp -a /tmp/farm-market/Farm-market-uganda--main/. ./
+          rm -f Farm-market-uganda-end-to-end-admin.zip
+      - name: Commit extracted project
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Extract uploaded project' || exit 0
+          git push
